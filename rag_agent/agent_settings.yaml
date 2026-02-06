@@ -1,0 +1,6 @@
+# RAG Agent Configuration
+GOOGLE_CLOUD_PROJECT: "search-ahmed"
+GOOGLE_CLOUD_LOCATION: "europe-west4"
+GOOGLE_GENAI_USE_VERTEXAI: "1"
+ROOT_AGENT_MODEL: "gemini-2.0-flash-exp"
+RAG_CORPUS: "projects/36231825761/locations/europe-west4/ragCorpora/7991637538768945152"
