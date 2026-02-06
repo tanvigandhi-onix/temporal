@@ -1,92 +1,101 @@
-# adk-agent-apps
+---
 
-A multi agent apps project built with Google's Agent Development Kit (ADK).
+# Temporal RAG Agent – POC
+
+This repository is a **proof of concept (POC)** demonstrating how **Temporal** can be used to orchestrate a **Retrieval-Augmented Generation (RAG) agent** with reliable execution, retries, and workflow visibility.
+
+---
+
+## Overview
+
+* Temporal **workflows** manage the agent execution flow
+* Temporal **activities** handle the actual RAG logic
+* Automatic **retry and failure handling**
+* **FastAPI** is used to trigger workflows
+* Execution can be monitored using **Temporal UI**
+
+---
+
+## Architecture
+
+FastAPI → Temporal Workflow → Temporal Activities → RAG Agent
+
+---
 
 ## Project Structure
 
-This project is organized as follows:
-
 ```
-adk-agent-apps/
-├── apps/                 # Parent folder containing all the apps
-    └── app1              # Individual app folder
-        ├── __init__.py   
-        ├── agent.py      # Main agent logic
-        ├── tools.py      # Custom tools used by the agent
-        ├── utils.py      # Utility functions and helpers specific to this app
-        └── sub_agents/   # folder containing the sub agents
-        └── tests/        # Unit, integration, and load tests
-    └── app2              # Individual app folder
-        ├── __init__.py   
-        ├── agent.py      # Main agent logic
-        ├── tools.py      # Custom tools used by the agent
-        ├── utils.py      # Utility functions and helpers specific to this app
-        └── sub_agents/   # folder containing the sub agents
-        └── tests/        # Unit, integration, and load tests
-    └── server.py         # FastAPI Backend server hosting all the apps
-    └── utils/           # Common Utility functions and helpers
-├── notebooks/           # Jupyter notebooks for prototyping and evaluation
-├── Makefile             # Makefile for common commands
-├── GEMINI.md            # AI-assisted development guide
-└── pyproject.toml       # Project dependencies and configuration
-└── Dockerfile           # Dockerfile required for building the docker image
+temporal-rag_agent/
+├── rag_agent/
+│   ├── agent.py          # Core RAG agent logic
+│   ├── tools.py          # Retrieval and helper tools
+│   ├── workflows/        # Temporal workflows
+│   ├── activities/       # Temporal activities
+│   └── tests/
+│
+├── server.py             # FastAPI server (workflow trigger)
+├── pyproject.toml
+└── README.md
 ```
 
-## Requirements
+---
 
-Before you begin, ensure you have:
-- **uv**: Python package manager - [Install](https://docs.astral.sh/uv/getting-started/installation/)
-- **Google Cloud SDK**: For GCP services - [Install](https://cloud.google.com/sdk/docs/install)
-- **make**: Build automation tool - [Install](https://www.gnu.org/software/make/) (pre-installed on most Unix-based systems)
+## Why Temporal?
 
+* Reliable execution for long-running workflows
+* Built-in retries and failure recovery
+* Clear separation between orchestration and business logic
+* Strong observability through Temporal UI
 
-## Quick Start (Local Testing)
+---
 
-Install required packages and launch the local development environment:
+## Running Locally
+
+### Prerequisites
+
+* Python 3.10+
+* Temporal Server (local or remote)
+* `uv` or `pip`
+
+---
+
+### Steps (Run in Separate Terminals)
+
+**Terminal 1 – Start the Temporal dev server**
 
 ```bash
-make install && make playground
+temporal server start-dev
 ```
 
-## Commands
+**Terminal 2 – Start the workflow trigger**
 
-| Command              | Description                                                                                 |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| `make install`       | Install all required dependencies using uv                                                  |
-| `make playground`    | Launch local development environment with backend and frontend - leveraging `adk web` command.|
-| `make local-backend` | Launch local development server |                                                                   |
+```bash
+python start_workflow.py
+```
 
-For full command options and usage, refer to the [Makefile](Makefile).
+**Terminal 3 – Start the Temporal worker**
 
+```bash
+python worker.py
+```
 
-## Usage
+> Ensure the Temporal server is running before starting the workflow and worker.
 
-This template follows a "bring your own agent" approach - you focus on your business logic, and the template handles everything else (UI, infrastructure, deployment).
+---
 
-1. **Integrate:** Import your agent by adding your agent app folder containing the app code changes under the `apps` folder.
-2. **Test:** Explore your agent functionality using the Streamlit playground with `make playground` and by deploying locally as a Fast API server using `make local-backend` command. The playground offers features like chat history, user feedback, and various input types, and automatically reloads your agent on code changes. You can use the 'adk_app_testing.ipynb' notebook to test your app.
-3. **Deploy:** Once the agent app is tested locally, you need to push your app changes to the main branch by raising a pull request. Once the pull request is reviewed and merged, the app changes will get deployed automatically to the dev Cloud run service using Cloud Build.
-4. **Monitor:** Track performance and gather insights using Cloud Logging and Tracing to iterate on your application.
+## Demo Flow
 
-The project includes a `GEMINI.md` file that provides context for AI tools like Gemini CLI when asking questions about your template.
+1. FastAPI server is started
+2. Temporal worker listens for tasks
+3. Workflow is triggered using `start_workflow.py`
+4. Workflow executes RAG activities
+5. Failures are retried automatically
+6. Execution can be viewed in Temporal UI
 
+---
 
-## Deployment
+## Notes
 
-### Local Environment
+This project is a **POC** focused on showcasing Temporal-based orchestration for AI agents.
 
-You can deploy your app locally using the following two options
-
-1. **Using adk web:** You can deploy using adk web. Run the following `make playground` command which deploys the app using adk web. 
-
-2. **Fast API server:** You can deploy the app locally as a Fast API server. Run the following `make local-backend` command to deploy the app locally as a Fast API server.
-
-
-### Dev Environment
-
-The app is deployed on Cloud Run in dev environment. The app changes should not be directly deployed to Cloud Run by the developer. The following process will be followed to deploy the app changes to Cloud Run
-
-1. Developer should raise a pull request to merge their changes to the `main` branch. 
-2. The pull request changes will get reviewed.
-3. Once the changes are reviewed and approved, the pull request will be merged to the `main` branch.
-4. Once the pull request is merged, the changes will be deployed to Cloud Run. 
+---
